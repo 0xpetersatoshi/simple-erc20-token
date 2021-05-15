@@ -48,7 +48,9 @@ describe("Token contract", function () {
       const addr1Balance = await hardhatToken.balanceOf(
         addr1.address
       );
-      expect(addr1Balance).to.equal(50);
+
+      // Convert balances to string to avoid big number overflow
+      expect(addr1Balance.toString()).to.equal(ethers.BigNumber.from(50).toString());
 
       // Transfer 50 tokens from addr1 to addr2
       // We use .connect(signer) to send a transaction from another account
@@ -56,7 +58,7 @@ describe("Token contract", function () {
       const addr2Balance = await hardhatToken.balanceOf(
         addr2.address
       );
-      expect(addr2Balance).to.equal(50);
+      expect(addr2Balance.toString()).to.equal(ethers.BigNumber.from(50).toString());
     });
 
     it("Should fail if sender doesn’t have enough tokens", async function () {
@@ -68,11 +70,11 @@ describe("Token contract", function () {
       // `require` will evaluate false and revert the transaction.
       await expect(
         hardhatToken.connect(addr1).transfer(owner.address, 1)
-      ).to.be.revertedWith("Not enough tokens");
+      ).to.be.revertedWith("transfer amount exceeds balance");
 
       // Owner balance shouldn't have changed.
-      expect(await hardhatToken.balanceOf(owner.address)).to.equal(
-        initialOwnerBalance
+      expect((await hardhatToken.balanceOf(owner.address)).toString()).to.equal(
+        initialOwnerBalance.toString()
       );
     });
 
@@ -91,17 +93,18 @@ describe("Token contract", function () {
       const finalOwnerBalance = await hardhatToken.balanceOf(
         owner.address
       );
-      expect(finalOwnerBalance).to.equal(initialOwnerBalance - 150);
+
+      expect(finalOwnerBalance.toString()).to.equal(initialOwnerBalance.sub(150).toString());
 
       const addr1Balance = await hardhatToken.balanceOf(
         addr1.address
       );
-      expect(addr1Balance).to.equal(100);
+      expect(addr1Balance.toString()).to.equal(ethers.BigNumber.from(100).toString());
 
       const addr2Balance = await hardhatToken.balanceOf(
         addr2.address
       );
-      expect(addr2Balance).to.equal(50);
+      expect(addr2Balance.toString()).to.equal(ethers.BigNumber.from(50).toString());
     });
   });
 });
